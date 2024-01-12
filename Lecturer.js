@@ -40,6 +40,9 @@ app.post('/Lecturer/login', (req, res) => {
     
 })
 
+app.post('/Lecturer/View Detail', (req, res) => {
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
