@@ -3,7 +3,7 @@ const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcryptjs')
 
-
+app.use(express.json());
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
@@ -31,18 +31,29 @@ async function run() {
 run().catch(console.dir);
 
 
-app.post('/login', async (req, res) => {
-    const {email, password} = req.body;
-    const hash = await bcryptjs.hash(password, 10);
-    const admin = await client.db("admin").collection("admin").findOne({email: email});
-    if (admin) {
-        const passwordMatch = await bcryptjs.compare(password, admin.password);
-        if (passwordMatch) {
-            res.send("Login successful");
-        } else {
-            res.send("Password does not match");
-        }
-    } else {
-        res.send("Admin not found");
-    }
-})
+app.post('/students/login', async (req, res) => {
+  // Connect the client to the server 
+  await client.connect();
+
+  const username = req.body.username;
+  const password = req.body.password;
+
+  const admin = await client.db("ManagementSystem").collection("user").findOne({
+      "username": {$eq :req.body.username}
+  });
+  if (admin) {
+      const passwordMatch = await bcryptjs.compare(password,user.password);
+      if (passwordMatch) {
+          res.send("Login successful");
+          console.log(username);
+      } else {
+          res.send("Password does not match");
+      }
+  } else {
+      res.send("Admin not found");
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
+});
