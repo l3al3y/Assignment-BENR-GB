@@ -45,11 +45,11 @@ app.post('/Lecturer/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  const admin = await client.db("ManagementSystem").collection("user").findOne({
+  const lecturer = await client.db("ManagementSystem").collection("user").findOne({
       "username": {$eq :req.body.username}
   });
-  if (admin) {
-      const passwordMatch = await bcryptjs.compare(password,user.password);
+  if (lecturer) {
+      const passwordMatch = await bcryptjs.compare(password,lecturer.password);
       if (passwordMatch) {
           res.send("Login successful");
           console.log(username);
@@ -64,6 +64,9 @@ app.post('/Lecturer/login', async (req, res) => {
 
 
 app.post('/Lecturer/View Detail', (req, res) => {
+  
+
+
 })
 
 app.post('/Lecturer/Student list', (req, res) => {
