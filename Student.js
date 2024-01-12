@@ -5,7 +5,7 @@ const bcryptjs = require('bcryptjs')
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://b022210085:1234@syamim.lox0su1.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -31,8 +31,18 @@ async function run() {
 run().catch(console.dir);
 
 
-app.post('/students', (req, res) => {
-  const student = req.body;
-  students.push(student);
-  res.send(`Student ${student.name} added`);
-});
+app.post('/login', async (req, res) => {
+    const {email, password} = req.body;
+    const hash = await bcryptjs.hash(password, 10);
+    const admin = await client.db("admin").collection("admin").findOne({email: email});
+    if (admin) {
+        const passwordMatch = await bcryptjs.compare(password, admin.password);
+        if (passwordMatch) {
+            res.send("Login successful");
+        } else {
+            res.send("Password does not match");
+        }
+    } else {
+        res.send("Admin not found");
+    }
+})
