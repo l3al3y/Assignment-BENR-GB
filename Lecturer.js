@@ -36,18 +36,10 @@ app.post('/lecturer', (req, res) => {
   res.send(`Lecturer ${lecturer.name} added`);
 });
 
-app.post('/lecturer/login', (req, res) => {
+app.post('/Lecturer/login', (req, res) => {
     
 })
 
-app.post('/lecturer/View Detail', (req, res) => {
-})
-
-app.post('/lecturer/Student list', (req, res) => {
-})
-
-app.post('/lecturer/View report', (req, res) => {
-})
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
