@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
-const bcryptjs = require('bcryptjs')
+const bcryptjs = require('bcrypt')
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -36,20 +36,28 @@ app.post('/lecturer', (req, res) => {
   res.send(`Lecturer ${lecturer.name} added`);
 });
 
-app.post('/Lecturer/login',async (req, res) => {
-  const {email, password} = req.body;
-  const admin = await client.db("ManagementSystem").collection("user").findOne({email: email});
+app.post('/Lecturer/login', async (req, res) => {
+  // Connect the client to the server 
+
+  const username = req.body.username;
+  const password = req.body.password;
+
+  const admin = await client.db("ManagementSystem").collection("user").findOne({
+      "username": {$eq :req.body.username}
+  });
   if (admin) {
-      const passwordMatch = await bcryptjs.compare(password, user.password);
+      const passwordMatch = await bcryptjs.compare(password,user.password);
       if (passwordMatch) {
           res.send("Login successful");
+          console.log(username);
       } else {
           res.send("Password does not match");
       }
   } else {
       res.send("Lecturer not found");
   }
-})
+});
+
 
 
 app.post('/Lecturer/View Detail', (req, res) => {
