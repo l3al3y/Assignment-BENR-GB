@@ -2,7 +2,6 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
-app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -30,7 +29,7 @@ async function run() {
     }
 }
 run().catch(console.dir);
-
+app.use(express.json());
 
 app.post('/admin', (req, res) => {
     const admin = req.body;
@@ -38,8 +37,32 @@ app.post('/admin', (req, res) => {
     res.send(`Admin ${admin.name} added`);
 });
 
-app.post('/login', (req, res) => {
-    client.db("ManagementSystem").collection("users").find({
+app.post('/students/login', async (req, res) => {
+    // Connect the client to the server
+  
+    const username = req.body.username;
+    const password = req.body.password;
+  
+    const admin = await client.db("ManagementSystem").collection("user").findOne({
+        "username": {$eq :req.body.username}
+    });
+    if (admin) {
+        const passwordMatch = await bcryptjs.compare(password,user.password);
+        if (passwordMatch) {
+            res.send("Login successful");
+            console.log(username);
+        } else {
+            res.send("Password does not match");
+        }
+    } else {
+        res.send("Student not found");
+    }
+  });
+  
+
+
+app.post('/Admin/AddStudent', (req, res) => {
+    client.db("ManagementSystem").collection("user").find({
       "username": { $eq: req.body.username }
     }).toArray().then((result) => {
       if (result.length > 0) {
@@ -47,30 +70,19 @@ app.post('/login', (req, res) => {
       } else {
         const {username,password,student_ID,role,}=req.body
         const hash= bcryptjs.hashSync(password,10);
-        client.db("ManagementSystem").collection("users").insertOne({
-          "username": SyamimZaki,
+        client.db("ManagementSystem").collection("user").insertOne({
+          "username": username,
           "password": hash,
-          "student_ID":B022210085,
+          "student_ID": student_ID,
           "role": role
         })
-        
         res.send('Register successfully')
       }
    })
   })
 
-app.post('/Admin/AddStudent', (req, res) => {
-    const { username, password } = req.body
-    console.log(username, password);
 
-    const hash = bcryptjs.hashSync(password, 10);
-    client.db("ManagementSystem").collection("users").
-        insertOne({ "username": req.body.username, "password": hash });
-    res.send('Register successfully');
-    console.log(hash);
-})
-
-app.post('/View Detail', (req, res) => {
+app.get('/View Detail', (req, res) => {
 
 
 })
