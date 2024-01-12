@@ -46,6 +46,9 @@ app.post('/Lecturer/View Detail', (req, res) => {
 app.post('/Lecturer/Student list', (req, res) => {
 })
 
+app.post('/Lecturer/View report', (req, res) => {
+})
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
