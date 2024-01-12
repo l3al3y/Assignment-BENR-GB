@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
-const bcryptjs = require('bcryptjs')
+const bcryptjs = require('bcrypt')
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -37,6 +37,27 @@ app.post('/admin', (req, res) => {
     res.send(`Admin ${admin.name} added`);
 });
 
+app.post('/login', (req, res) => {
+    client.db("ManagementSystem").collection("users").find({
+      "username": { $eq: req.body.username }
+    }).toArray().then((result) => {
+      if (result.length > 0) {
+        res.status(400).send('Username already exists')
+      } else {
+        const {username,password,student_ID,role,}=req.body
+        const hash= bcryptjs.hashSync(password,10);
+        client.db("ManagementSystem").collection("users").insertOne({
+          "username": SyamimZaki,
+          "password": hash,
+          "student_ID":B022210085,
+          "role": role
+        })
+
+        res.send('Register successfully')
+      }
+   })
+  })
+
 app.post('/Admin/AddStudent', (req, res) => {
     const { username, password } = req.body
     console.log(username, password);
@@ -49,6 +70,12 @@ app.post('/Admin/AddStudent', (req, res) => {
 })
 
 app.post('/View Detail', (req, res) => {
+
+
+})
+
+app.post('/Admin/StudentList', (req, res) => {
+
 
 })
 
