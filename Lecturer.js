@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
-app.use(express.json());
+
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -30,6 +30,8 @@ async function run() {
   }
 }
 run().catch(console.dir);
+
+app.use(express.json());
 
 app.post('/lecturer', (req, res) => {
     const lecturer = req.body;
