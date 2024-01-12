@@ -5,7 +5,7 @@ const bcryptjs = require('bcryptjs')
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://b022210085:1234@syamim.lox0su1.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -37,8 +37,15 @@ app.post('/admin', (req, res) => {
     res.send(`Admin ${admin.name} added`);
   });
 
-  app.post('/login', (req, res) => {
-    
+  app.post('/register', (req, res) => {
+    const {username,password}=req.body
+    console.log(username,password);
+  
+    const hash= bcryptjs.hashSync(password,10);
+    client.db("groupb.groupb").collection("users").
+    insertOne({"username": req.body.username,"password": hash });
+    res.send('Register successfully');
+    console.log(hash);
   })
 
   app.post('/View Detail', (req, res) => {
