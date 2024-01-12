@@ -36,9 +36,21 @@ app.post('/lecturer', (req, res) => {
   res.send(`Lecturer ${lecturer.name} added`);
 });
 
-app.post('/Lecturer/login', (req, res) => {
-    
+app.post('/Lecturer/login',async (req, res) => {
+  const {email, password} = req.body;
+  const admin = await client.db("lecturer").collection("lecturer").findOne({email: email});
+  if (admin) {
+      const passwordMatch = await bcryptjs.compare(password, lecturer.password);
+      if (passwordMatch) {
+          res.send("Login successful");
+      } else {
+          res.send("Password does not match");
+      }
+  } else {
+      res.send("Lecturer not found");
+  }
 })
+
 
 app.post('/Lecturer/View Detail', (req, res) => {
 })
