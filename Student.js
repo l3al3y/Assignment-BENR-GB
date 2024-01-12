@@ -32,7 +32,7 @@ run().catch(console.dir);
 
 
 app.post('/students/login', async (req, res) => {
-  // Connect the client to the server 
+  // Connect the client to the server
 
   const username = req.body.username;
   const password = req.body.password;
@@ -52,6 +52,57 @@ app.post('/students/login', async (req, res) => {
       res.send("Student not found");
   }
 });
+
+
+app.post('/students/record-attendance', async (req, res) => {
+  const { student_ID, attendance_status } = req.body;
+  const attendance_date = new Date();
+ 
+  const validStatuses = ['present', 'absent'];
+ 
+  if (!validStatuses.includes(attendance_status)) {
+     return res.status(400).send('Invalid attendance status. Accepted values are "present" or "absent"');
+  }
+ 
+  const Attendance = await client.db("ManagementSystem").collection("user").findOne({
+     "student_ID": {$eq : student_ID},
+  });
+ 
+  if (Attendance) {
+     // Save the attendance record
+     const attendance_record = {
+       student_ID: student_ID,
+       attendance_date: attendance_date,
+       attendance_status: attendance_status
+     };
+     await client.db("ManagementSystem").collection("attendance").insertOne(attendance_record);
+ 
+     res.send("Attendance recorded");
+     console.log(username);
+  } else {
+     res.send("Student not found ");
+  }
+ });
+
+ app.post('/student/detail-timeline'), async (req, res) => 
+ 
+  {student_ID = req.body};
+
+  try {
+    const Attendance = await client.db("ManagementSystem").collection("attendance").find({
+      "student_ID": student_ID}).toArray();
+
+    if (Attendance.length > 0) {
+      res.json(Attendance);
+    } else {
+      res.send("No attendance records found for this student");
+    }
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
