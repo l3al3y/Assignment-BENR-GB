@@ -37,7 +37,7 @@ app.post('/admin', (req, res) => {
     res.send(`Admin ${admin.name} added`);
 });
 
-app.post('/students/login', async (req, res) => {
+app.post('/admin/login', async (req, res) => {
     // Connect the client to the server
   
     const username = req.body.username;
@@ -58,7 +58,7 @@ app.post('/students/login', async (req, res) => {
         res.send("Student not found");
     }
   });
-  
+
 
 
 app.post('/Admin/AddStudent', (req, res) => {
