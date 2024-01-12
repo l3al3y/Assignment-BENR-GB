@@ -51,3 +51,8 @@ app.post('/Admin/AddStudent', (req, res) => {
 app.post('/View Detail', (req, res) => {
 
 })
+
+app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  }); 
+  
