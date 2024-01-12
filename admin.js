@@ -52,7 +52,7 @@ app.post('/login', (req, res) => {
           "student_ID":B022210085,
           "role": role
         })
-
+        
         res.send('Register successfully')
       }
    })
