@@ -38,9 +38,9 @@ app.post('/lecturer', (req, res) => {
 
 app.post('/Lecturer/login',async (req, res) => {
   const {email, password} = req.body;
-  const admin = await client.db("lecturer").collection("lecturer").findOne({email: email});
+  const admin = await client.db("ManagementSystem").collection("user").findOne({email: email});
   if (admin) {
-      const passwordMatch = await bcryptjs.compare(password, lecturer.password);
+      const passwordMatch = await bcryptjs.compare(password, user.password);
       if (passwordMatch) {
           res.send("Login successful");
       } else {

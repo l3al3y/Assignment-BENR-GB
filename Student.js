@@ -33,7 +33,6 @@ run().catch(console.dir);
 
 app.post('/students/login', async (req, res) => {
   // Connect the client to the server 
-  await client.connect();
 
   const username = req.body.username;
   const password = req.body.password;
@@ -50,7 +49,7 @@ app.post('/students/login', async (req, res) => {
           res.send("Password does not match");
       }
   } else {
-      res.send("Admin not found");
+      res.send("Student not found");
   }
 });
 
