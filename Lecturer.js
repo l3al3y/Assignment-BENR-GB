@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
+app.use(express.json());
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
