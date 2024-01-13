@@ -3,7 +3,7 @@ const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
 
-
+app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
@@ -63,34 +63,49 @@ app.post('/Lecturer/login', async (req, res) => {
 
 
 
-app.post('/Lecturer/ViewDetail', async (req, res) => {
-    // Connect the client to the server
-    const subject = req.body.subject;
-    const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
-       "subject": {$eq :req.body.subject}
-    });
-    if (lecturer) {
-       res.send(lecturer);
-    } else { 
-       res.send("Subject not found");
-    }
-   });
+app.post('/Lecturer/ViewDetailAttendance', async (req, res) => {
+  // Connect the client to the server
+  const subject = req.body.subject;
+  
+  try {
+      const Subject = await client.db("ManagementSystem").collection("attendance").find({
+          "subject": subject
+      }).toArray();
 
-
-   app.get('/Lecturer/Studentlist', async (req, res) => {
-    const subject = req.body.subject;
-    const students = await client.db("ManagementSystem").collection("attendance").find({
-        "subject": {$eq :subject}
-    }).toArray();
-
-    if (students.length > 0) {
-        res.send(students);
-    } else {
-        res.send("No students found");
-    }
+      res.send(Subject);
+  } catch (error) {
+      console.error("Error fetching attendance details:", error);
+      res.status(500).send("Internal Server Error");
+  }
 });
 
-app.post('/Lecturer/View report', (req, res) => {
+
+
+app.post('/Lecturer/Studentlist', async (req, res) => {
+  try {
+      const subject = req.body.subject;
+      const lecturer = await client.db("ManagementSystem").collection("attendance").find({
+          "subject": subject
+      }).toArray();
+
+      if (lecturer.length > 0) {
+          const studentList = lecturer.map(record => ({
+              student_ID: record.student_ID,
+              subject: record.subject
+          }));
+
+          res.send(studentList);
+      } else {
+          res.send("No students found for the given subject");
+      }
+  } catch (error) {
+      console.error("Error fetching student list:", error);
+      res.status(500).send("Internal server error");
+  }
+});
+
+
+app.post('/Lecturer/Viewreport', (req, res) => {
 
   
 })
