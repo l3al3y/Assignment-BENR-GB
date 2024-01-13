@@ -37,11 +37,11 @@ app.post('/students/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  const admin = await client.db("ManagementSystem").collection("user").findOne({
+  const Student = await client.db("ManagementSystem").collection("user").findOne({
       "username": {$eq :req.body.username}
   });
-  if (admin) {
-      const passwordMatch = await bcryptjs.compare(password,user.password);
+  if (Student) {
+      const passwordMatch = await bcryptjs.compare(password,Student.password);
       if (passwordMatch) {
           res.send("Login successful");
           console.log(username);
@@ -55,7 +55,7 @@ app.post('/students/login', async (req, res) => {
 
 
 app.post('/students/record-attendance', async (req, res) => {
-  const { student_ID, attendance_status } = req.body;
+  const { student_ID, attendance_status,subject } = req.body;
   const attendance_date = new Date();
  
   const validStatuses = ['present', 'absent'];
@@ -73,24 +73,25 @@ app.post('/students/record-attendance', async (req, res) => {
      const attendance_record = {
        student_ID: student_ID,
        attendance_date: attendance_date,
-       attendance_status: attendance_status
+       attendance_status: attendance_status,
+       subject: subject
      };
      await client.db("ManagementSystem").collection("attendance").insertOne(attendance_record);
- 
      res.send("Attendance recorded");
-     console.log(username);
+
+     console.log(attendance_record);
   } else {
      res.send("Student not found ");
   }
  });
 
- app.post('/student/detail-timeline'), async (req, res) => 
- 
-  {student_ID = req.body};
+ app.post('/students/detail-timeline', async (req, res) => {
+  const { student_ID = req.body.student_ID } = req.body;
 
   try {
     const Attendance = await client.db("ManagementSystem").collection("attendance").find({
-      "student_ID": student_ID}).toArray();
+      "student_ID": student_ID
+    }).toArray();
 
     if (Attendance.length > 0) {
       res.json(Attendance);
@@ -100,8 +101,7 @@ app.post('/students/record-attendance', async (req, res) => {
   } catch (error) {
     res.status(500).send("Internal server error");
   }
-
-
+});
 
 
 app.listen(port, () => {
