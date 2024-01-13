@@ -47,7 +47,7 @@ app.post('/admin/login', async (req, res) => {
         "username": {$eq :req.body.username}
     });
     if (admin) {
-        const passwordMatch = await bcryptjs.compare(password,user.password);
+        const passwordMatch = await bcryptjs.compare(password,admin.password);
         if (passwordMatch) {
             res.send("Login successful");
             console.log(username);
@@ -58,8 +58,6 @@ app.post('/admin/login', async (req, res) => {
         res.send("Student not found");
     }
   });
-
-
 
 app.post('/Admin/AddStudent', (req, res) => {
     client.db("ManagementSystem").collection("user").find({
@@ -80,12 +78,24 @@ app.post('/Admin/AddStudent', (req, res) => {
       }
    })
   })
+  
+  app.get('/admin/viewdetail', authenticateAdmin, async (req, res) => {
+    try {
+        const { student_ID } = req.query; 
 
+        const attendanceCollection = client.db("ManagementSystem").collection("user");
+        const attendanceRecords = await attendanceCollection.find({ "student_ID": student_ID }).toArray();
 
-app.get('/View Detail', (req, res) => {
-
-
-})
+        if (attendanceRecords.length > 0) {
+            res.json(attendanceRecords);
+        } else {
+            res.send("No attendance records found for this student");
+        }
+    } catch (error) {
+        console.error("Error fetching attendance:", error);
+        res.status(500).send("Internal server error");
+    }
+});
 
 app.post('/Admin/StudentList', (req, res) => {
 
