@@ -43,7 +43,7 @@ app.post('/admin/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  const admin = await client.db("ManagementSystem").collection("user").findOne({
+  const admin = await client.db("ManagementSystem").collection("attendance").findOne({
     "username": { $eq: req.body.username }
   });
   if (admin) {
@@ -59,7 +59,7 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-app.post('/Admin/AddStudent', (req, res) => {
+app.post('/admin/addstudent', (req, res) => {
   client.db("ManagementSystem").collection("attendance").find({
     "username": { $eq: req.body.username }
   }).toArray().then((result) => {
@@ -83,7 +83,7 @@ app.get('/admin/viewdetailstudent', async (req, res) => {
  
 });
 
-app.get('/admin/studentlist', async (req, res) => {
+app.get('/admin/list', async (req, res) => {
   try {
     const studentCollection = client.db("ManagementSystem").collection("attendance");
     const students = await studentCollection.find().toArray();
