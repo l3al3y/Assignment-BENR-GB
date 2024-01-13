@@ -79,7 +79,7 @@ app.post('/Admin/AddStudent', (req, res) => {
    })
   })
   
-  app.get('/admin/viewdetail', authenticateAdmin, async (req, res) => {
+  app.get('/admin/viewdetail', async (req, res) => {
     try {
         const { student_ID } = req.query; 
 
@@ -97,10 +97,21 @@ app.post('/Admin/AddStudent', (req, res) => {
     }
 });
 
-app.post('/Admin/StudentList', (req, res) => {
+app.get('/admin/student-list', async (req, res) => {
+    try {
+        const studentCollection = client.db("ManagementSystem").collection("user");
+        const students = await studentCollection.find().toArray();
 
-
-})
+        if (students.length > 0) {
+            res.json(students); 
+        } else {
+            res.send("No students found in the system");
+        }
+    } catch (error) {
+        console.error("Error fetching student list:", error);
+        res.status(500).send("Internal server error");
+    }
+});
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
