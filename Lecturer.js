@@ -77,7 +77,7 @@ app.post('/Lecturer/ViewDetail', async (req, res) => {
    });
 
 
-   app.post('/Lecturer/Studentlist', async (req, res) => {
+   app.get('/Lecturer/Studentlist', async (req, res) => {
     const subject = req.body.subject;
     const students = await client.db("ManagementSystem").collection("attendance").find({
         "subject": {$eq :subject}
