@@ -78,21 +78,16 @@ app.post('/Lecturer/ViewDetail', async (req, res) => {
 
 
    app.get('/Lecturer/Studentlist', async (req, res) => {
-    const { student_ID = req.body.student_ID } = req.body;
-
-  try {
-    const Attendance = await client.db("ManagementSystem").collection("attendance").find({
-      "student_ID": student_ID
+    const subject = req.body.subject;
+    const students = await client.db("ManagementSystem").collection("attendance").find({
+        "subject": {$eq :subject}
     }).toArray();
 
-    if (Attendance.length > 0) {
-      res.json(Attendance);
+    if (students.length > 0) {
+        res.send(students);
     } else {
-      res.send("No attendance records found for this student");
+        res.send("No students found");
     }
-  } catch (error) {
-    res.status(500).send("Internal server error");
-  }
 });
 
 app.post('/Lecturer/View report', (req, res) => {
