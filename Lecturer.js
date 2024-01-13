@@ -64,17 +64,17 @@ app.post('/Lecturer/login', async (req, res) => {
 
 
 app.post('/Lecturer/ViewDetail', async (req, res) => {
-const subject = req.body.subject;
-const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
-  "subject": {$eq :req.body.subject}
-}).toArray().then(result => {
-  if(lecturer){
-    res.send(result);
-  } else { 
-    res.send("Subject not found");
-  }
-})
-});
+    // Connect the client to the server
+    const subject = req.body.subject;
+    const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
+       "subject": {$eq :req.body.subject}
+    });
+    if (lecturer) {
+       res.send(lecturer);
+    } else { 
+       res.send("Subject not found");
+    }
+   });
 
 
 app.post('/Lecturer/Student list', (req, res) => {
