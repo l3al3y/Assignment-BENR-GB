@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 app.use(express.json());
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -32,26 +33,35 @@ run().catch(console.dir);
 
 
 app.post('/students/login', async (req, res) => {
+  console.log('login',req.body)  
+  
   // Connect the client to the server
+ 
+  const {username, password} = req.body;
 
-  const username = req.body.username;
-  const password = req.body.password;
-
+  function generateToken(role) {
+    const token = jwt.sign({
+      role:role
+    }, 'secret', { expiresIn: '1h' });
+    return token;
+  }
+ 
   const Student = await client.db("ManagementSystem").collection("user").findOne({
-      "username": {$eq :req.body.username}
+       "username": {$eq :req.body.username}
   });
   if (Student) {
-      const passwordMatch = await bcryptjs.compare(password,Student.password);
-      if (passwordMatch) {
-          res.send("Login successful");
-          console.log(username);
-      } else {
-          res.send("Password does not match");
-      }
+       const passwordMatch = await bcryptjs.compare(password,Student.password);
+       if (passwordMatch) {
+           const token = generateToken(Student.role);
+           res.send({ token: token, message: "Login successful" });
+           console.log(token);
+       } else {
+           res.send("Password does not match");
+       }
   } else {
-      res.send("Student not found");
+       res.send("Student not found");
   }
-});
+ });
 
 
 app.post('/students/record-attendance', async (req, res) => {
