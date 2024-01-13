@@ -77,10 +77,22 @@ app.post('/Lecturer/ViewDetail', async (req, res) => {
    });
 
 
-app.post('/Lecturer/Student list', (req, res) => {
-})
+   app.post('/Lecturer/Studentlist', async (req, res) => {
+    const subject = req.body.subject;
+    const students = await client.db("ManagementSystem").collection("attendance").find({
+        "subject": {$eq :subject}
+    }).toArray();
+
+    if (students.length > 0) {
+        res.send(students);
+    } else {
+        res.send("No students found");
+    }
+});
 
 app.post('/Lecturer/View report', (req, res) => {
+
+  
 })
 
 
