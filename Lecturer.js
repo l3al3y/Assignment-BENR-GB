@@ -62,7 +62,7 @@ app.post('/Lecturer/login', async (req, res) => {
 });
 
 
-//show the list names of students who attend class by (username and subject)
+//show the list names of students who attend class by (subject)
 app.post('/Lecturer/ViewDetailAttendance', async (req, res) => {
   // Connect the client to the server
   const subject = req.body.subject;
@@ -80,7 +80,7 @@ app.post('/Lecturer/ViewDetailAttendance', async (req, res) => {
 });
 
 
-//show the list students who registered for the subject by (subject)
+//show the list students who registered for the subject by (subject)done
 app.post('/Lecturer/Studentlist', async (req, res) => {
   try {
       const subject = req.body.subject;
