@@ -45,7 +45,7 @@ app.post('/Lecturer/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  const lecturer = await client.db("ManagementSystem").collection("user").findOne({
+  const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
       "username": {$eq :req.body.username}
   });
   if (lecturer) {
@@ -62,7 +62,7 @@ app.post('/Lecturer/login', async (req, res) => {
 });
 
 
-//show the list names of students who attend class by (subject)
+//show the list names of students who attend class by (subject only)
 app.post('/Lecturer/ViewDetailAttendance', async (req, res) => {
   // Connect the client to the server
   const subject = req.body.subject;
