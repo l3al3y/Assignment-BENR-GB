@@ -37,7 +37,7 @@ app.post('/admin', (req, res) => {
   res.send(`Admin ${admin.name} added`);
 });
 
-app.post('/admin/addstudent', (req, res) => {
+app.post('/admin/adduser', (req, res) => {
   client.db("ManagementSystem").collection("attendance").find({
     "username": { $eq: req.body.username }
   }).toArray().then((result) => {
@@ -118,15 +118,14 @@ app.get('/admin/viewdetailstudent', async (req, res) => {
 
 app.get('/admin/list', async (req, res) => {
   try {
-      const faculty = req.body.faculty;
+      const student_ID = req.body.student_ID;
       const admin = await client.db("ManagementSystem").collection("attendance").find({
-          "faculty": faculty
+          "student_ID": student_ID
       }).toArray();
 
-      if (lecturer.length > 0) {
+      if (admin.length > 0) {
           const studentList = admin.map(record => ({
               student_ID: record.student_ID,
-              subject: record.subject
           }));
 
           res.send(studentList);
