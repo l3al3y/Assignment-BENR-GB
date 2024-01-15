@@ -2,8 +2,9 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
-app.use(express.urlencoded({ extended: true }));
+//app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
@@ -45,14 +46,22 @@ app.post('/Lecturer/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
+  function generateToken(role) {
+    const token = jwt.sign({
+      role:role
+    }, 'secret', { expiresIn: '1h' });
+    return token;
+  }
+
   const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
       "username": {$eq :req.body.username}
   });
   if (lecturer) {
       const passwordMatch = await bcryptjs.compare(password,lecturer.password);
       if (passwordMatch) {
-          res.send("Login successful");
-          console.log(username);
+          const token = generateToken(lecturer.role);
+          res.send({ token: token, message: "Login successful" });
+          console.log(token);
       } else {
           res.send("Password does not match");
       }
@@ -66,6 +75,21 @@ app.post('/Lecturer/login', async (req, res) => {
 app.post('/Lecturer/ViewDetailAttendance', async (req, res) => {
   // Connect the client to the server
   const subject = req.body.subject;
+
+  // Verify the bearer token
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send('Unauthorized. Missing bearer token.');
+  }
+
+  jwt.verify(token, 'secret', (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden. Invalid token.');
+    }
+  });
+
   
   try {
       const Subject = await client.db("ManagementSystem").collection("attendance").find({
@@ -93,6 +117,7 @@ app.post('/Lecturer/Studentlist', async (req, res) => {
               username: record.username,
               student_ID: record.student_ID,
               subject: record.subject,
+              faculty: record.faculty
           }));
 
           res.send(studentList);
@@ -106,10 +131,10 @@ app.post('/Lecturer/Studentlist', async (req, res) => {
 });
 
 
-app.post('/Lecturer/Viewreport', (req, res) => {
+//app.post('/Lecturer/Viewreport', (req, res) => {
 
   
-})
+//})
 
 
 app.listen(port, () => {
