@@ -65,7 +65,7 @@ app.post('/students/login', async (req, res) => {
 
 
 app.post('/students/record-attendance', async (req, res) => {
-  const { student_ID, attendance_status,subject,lecturer,faculty } = req.body;
+  const { username,student_ID, attendance_status,subject,lecturer,faculty } = req.body;
   const attendance_date = new Date();
  
   const validStatuses = ['present', 'absent'];
@@ -94,6 +94,7 @@ app.post('/students/record-attendance', async (req, res) => {
   if (Attendance) {
      // Save the attendance record
      const attendance_record = {
+       username: username,
        student_ID: student_ID,
        attendance_date: attendance_date,
        attendance_status: attendance_status,
