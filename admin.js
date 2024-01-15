@@ -68,7 +68,7 @@ app.post('/admin/addstudent', (req, res) => {
     } else {
       const { username, password, student_ID, role, } = req.body
       const hash = bcryptjs.hashSync(password, 10);
-      client.db("ManagementSystem").collection("user").insertOne({
+      client.db("ManagementSystem").collection("attendance").insertOne({
         "username": username,
         "password": hash,
         "student_ID": student_ID,
