@@ -91,6 +91,7 @@ app.post('/Lecturer/Studentlist', async (req, res) => {
       if (lecturer.length > 0) {
           const studentList = lecturer.map(record => ({
               student_ID: record.student_ID,
+              username: record.username, // Add this line to include the username
               subject: record.subject
           }));
 
