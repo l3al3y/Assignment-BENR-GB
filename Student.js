@@ -42,7 +42,7 @@ app.post('/students/login', async (req, res) => {
   function generateToken(role) {
     const token = jwt.sign({
       role:role
-    }, 'secret', { expiresIn: '1h' });
+    }, 'secret', { expiresIn: '30s' });
     return token;
   }
  
