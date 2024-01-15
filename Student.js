@@ -63,6 +63,17 @@ app.post('/students/login', async (req, res) => {
   }
  });
 
+ // Middleware to verify JWT token
+function verifyToken(req, res, next) {
+  const token = req.header('Authorization');
+  if (!token) return res.status(401).send('Access denied. Token not provided.');
+
+  jwt.verify(token, 'secret', (err, decoded) => {
+    if (err) return res.status(401).send('Invalid token.');
+    req.user = decoded;
+    next();
+  });
+}
 
 app.post('/students/record-attendance', async (req, res) => {
   const { student_ID, attendance_status,subject,lecturer,faculty } = req.body;
@@ -72,6 +83,11 @@ app.post('/students/record-attendance', async (req, res) => {
  
   if (!validStatuses.includes(attendance_status)) {
      return res.status(400).send('Invalid attendance status. Accepted values are "present" or "absent"');
+  }
+
+   // Additional check for user role if needed
+   if (req.user.role !== 'student') {
+    return res.status(403).send('Forbidden. Only students are allowed to record attendance.');
   }
  
   const Attendance = await client.db("ManagementSystem").collection("user").findOne({
@@ -96,6 +112,7 @@ app.post('/students/record-attendance', async (req, res) => {
      res.send("Student not found ");
   }
  });
+
 
  app.post('/students/detail-timeline', async (req, res) => {
   const { student_ID = req.body.student_ID } = req.body;
