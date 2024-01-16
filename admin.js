@@ -38,7 +38,7 @@ app.post('/admin', (req, res) => {
 });
 
 app.post('/admin/adduser', (req, res) => {
-  client.db("ManagementSystem").collection("attendance").find({
+  client.db("ManagementSystem").collection("user").find({
     "username": { $eq: req.body.username }
   }).toArray().then((result) => {
     if (result.length > 0) {
@@ -82,7 +82,7 @@ app.post('/admin/login', async (req, res) => {
 
 
 
-app.get('/admin/viewdetailstudent', async (req, res) => {
+/*app.get('/admin/viewdetails', async (req, res) => {
   const studentId = req.params.studentId;
 
   try {
@@ -96,6 +96,32 @@ app.get('/admin/viewdetailstudent', async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching student details:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+*/
+
+app.get('/admin/viewdetail', async (req, res) => {
+  const { student_ID = req.body.student_ID } = req.body;
+  const {faculty = req.body.faculty} = req.body;
+  const {subject = req.body.subject} = req.body;
+  const {lecturer = req.body.lecturer} = req.body;
+
+
+  try {
+    const Attendance = await client.db("ManagementSystem").collection("attendance").find({
+      "student_ID": student_ID,
+      "faculty": faculty,
+      "subject": subject,
+      "lecturer": lecturer
+    }).toArray();
+
+    if (Attendance.length > 0) {
+      res.json(Attendance);
+    } else {
+      res.send("No attendance records found for this student");
+    }
+  } catch (error) {
     res.status(500).send("Internal server error");
   }
 });
