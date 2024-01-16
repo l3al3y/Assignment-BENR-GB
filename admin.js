@@ -80,46 +80,40 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-
-
-/*app.get('/admin/viewdetails', async (req, res) => {
-  const studentId = req.params.studentId;
+app.get('/admin/viewdetail', async (req, res) => {
+  const { role } = req.body;
+  
 
   try {
-    const studentCollection = client.db("ManagementSystem").collection("attendance");
-    const student = await studentCollection.findOne({ "student_ID": studentId });
+    const Attendance = await client.db("ManagementSystem").collection("user").find({
+      "role": role,
+      
+    }).toArray();
 
-    if (student) {
-      res.json(student);
+    if (Attendance) {
+      res.json(Attendance);
     } else {
-      res.status(404).send("Student not found");
+      res.send("No record for this user");
     }
   } catch (error) {
-    console.error("Error fetching student details:", error);
     res.status(500).send("Internal server error");
   }
 });
-*/
 
-app.get('/admin/viewdetail', async (req, res) => {
-  const { student_ID = req.body.student_ID } = req.body;
-  const {faculty = req.body.faculty} = req.body;
-  const {subject = req.body.subject} = req.body;
-  const {lecturer = req.body.lecturer} = req.body;
-
+app.get('/admin/list', async (req, res) => {
+  const { subject } = req.body;
+  
 
   try {
-    const Attendance = await client.db("ManagementSystem").collection("attendance").find({
-      "student_ID": student_ID,
-      "faculty": faculty,
+    const List = await client.db("ManagementSystem").collection("attendance").find({
       "subject": subject,
-      "lecturer": lecturer
+      
     }).toArray();
 
-    if (Attendance.length > 0) {
-      res.json(Attendance);
+    if (List) {
+      res.json(List);
     } else {
-      res.send("No attendance records found for this student");
+      res.send("No record for this user");
     }
   } catch (error) {
     res.status(500).send("Internal server error");
@@ -127,31 +121,15 @@ app.get('/admin/viewdetail', async (req, res) => {
 });
 
 /*app.get('/admin/list', async (req, res) => {
+  const {subject} = req.body;
   try {
-    const studentCollection = client.db("ManagementSystem").collection("attendance");
-    const students = await studentCollection.find().toArray();
-
-    if (students.length > 0) {
-      res.json(students);
-    } else {
-      res.send("No students found in the system");
-    }
-  } catch (error) {
-    console.error("Error fetching student list:", error);
-    res.status(500).send("Internal server error");
-  }
-});*/
-
-app.get('/admin/list', async (req, res) => {
-  try {
-      const student_ID = req.body.student_ID;
-      const admin = await client.db("ManagementSystem").collection("attendance").find({
-          "student_ID": student_ID
+      const studentList = await client.db("ManagementSystem").collection("attendance").find({
+          "subject": subject
       }).toArray();
 
-      if (admin.length > 0) {
+      if (studentList.length > 0) {
           const studentList = admin.map(record => ({
-              student_ID: record.student_ID,
+              subject: record.subject,
           }));
 
           res.send(studentList);
@@ -163,6 +141,7 @@ app.get('/admin/list', async (req, res) => {
       res.status(500).send("Internal server error");
   }
 });
+*/
 
 app.delete('/admin/deletestudent/:studentId', async (req, res) => {
   const studentId = req.params.studentId;
