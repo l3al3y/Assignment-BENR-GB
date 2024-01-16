@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -63,15 +64,25 @@ app.post('/admin/login', async (req, res) => {
 
   const username = req.body.username;
   const password = req.body.password;
+  
+  function generateToken(role) {
+    const token = jwt.sign({
+      role:role
+    }, 'secret', { expiresIn: '1m' });
+    return token;
+  }
 
   const admin = await client.db("ManagementSystem").collection("attendance").findOne({
     "username": { $eq: req.body.username }
+
+    
   });
   if (admin) {
     const passwordMatch = await bcryptjs.compare(password, admin.password);
     if (passwordMatch) {
-      res.send("Login successful");
-      console.log(username);
+      const token = generateToken(admin.role);
+           res.send({ token: token, message: "Login successful" });
+           console.log(token);
     } else {
       res.send("Password does not match");
     }
@@ -103,7 +114,19 @@ app.get('/admin/viewdetail', async (req, res) => {
 app.get('/admin/list', async (req, res) => {
   const { subject } = req.body;
   
+// Verify the bearer token
+const authHeader = req.headers['authorization'];
+const token = authHeader && authHeader.split(' ')[1];
 
+if (!token) {
+  return res.status(401).send('Unauthorized. Missing bearer token.');
+}
+
+jwt.verify(token, 'secret', (err, user) => {
+  if (err) {
+    return res.status(403).send('Forbidden. Invalid token.');
+  }
+});
   try {
     const List = await client.db("ManagementSystem").collection("attendance").find({
       "subject": subject,
@@ -120,34 +143,11 @@ app.get('/admin/list', async (req, res) => {
   }
 });
 
-/*app.get('/admin/list', async (req, res) => {
-  const {subject} = req.body;
-  try {
-      const studentList = await client.db("ManagementSystem").collection("attendance").find({
-          "subject": subject
-      }).toArray();
-
-      if (studentList.length > 0) {
-          const studentList = admin.map(record => ({
-              subject: record.subject,
-          }));
-
-          res.send(studentList);
-      } else {
-          res.send("No students found for the given subject");
-      }
-  } catch (error) {
-      console.error("Error fetching student list:", error);
-      res.status(500).send("Internal server error");
-  }
-});
-*/
-
-app.delete('/admin/deletestudent/:studentId', async (req, res) => {
+app.delete('/admin/deleteuser', async (req, res) => {
   const studentId = req.params.studentId;
 
   try {
-    const studentCollection = client.db("ManagementSystem").collection("attendance");
+    const studentCollection = client.db("ManagementSystem").collection("user");
     const result = await studentCollection.deleteOne({ "student_ID": studentId });
 
     if (result.deletedCount > 0) {
