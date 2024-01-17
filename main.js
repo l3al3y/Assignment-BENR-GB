@@ -36,7 +36,7 @@ run().catch(console.dir);
 function generateToken(role) {
   const token = jwt.sign({
     role:role
-  }, 'secret', { expiresIn: '1m' });
+  }, 'secret', { expiresIn: '10m' });
   return token;
 }
 
@@ -192,60 +192,76 @@ app.post('/login', async (req, res) => {
 
   //STUDENT SECTION FOR RECORDING ATTENDANCE
 
-  app.post('/record-attendance', async (req, res) => {
-    const { username,student_ID, attendance_status,subject,lecturer,faculty } = req.body;
-    const attendance_date = new Date();
-   
-    const validStatuses = ['present', 'absent'];
-   
-    if (!validStatuses.includes(attendance_status)) {
-       return res.status(400).send('Invalid attendance status. Accepted values are "present" or "absent"');
-    }
-  
-     function authenticateStudent(req, res, next) {
-      const authHeader = req.headers['authorization'];
-      const token = authHeader && authHeader.split(' ')[1];
+  function authenticateStudent(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-     if (!token) {
-       return res.status(401).send('Unauthorized. Missing bearer token.');
-     }
-   
-     try {
-      const user = jwt.verify(token, 'secret');
-      if (user.role !== 'student') {
-        return res.status(403).send('Forbidden. Only students can record attendance.');
-      }
-      req.user = user;
-      next();
-    } catch (err) {
-      return res.status(403).send('Forbidden. Invalid token.');
+   if (!token) {
+     return res.status(401).send('Unauthorized. Missing bearer token.');
+   }
+ 
+  try {
+    const user = jwt.verify(token, 'secret');
+    if (user.role !== 'student') {
+      return res.status(403).send('Forbidden. Only students can record attendance.');
     }
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(403).send('Forbidden. Invalid token.');
   }
-   
-    const Attendance = client.db("ManagementSystem").collection("user").findOne({
-       "student_ID": {$eq : student_ID},
-    });
-   
+}
+
+app.post('/record-attendance', authenticateStudent, async (req, res) => {
+  const { username, student_ID, attendance_status, subject, lecturer, faculty } = req.body;
+  const attendance_date = new Date();
+
+  const validStatuses = ['present', 'absent'];
+
+  if (!validStatuses.includes(attendance_status)) {
+    return res.status(400).send('Invalid attendance status. Accepted values are "present" or "absent"');
+  }
+
+  try {
+    const Attendance = await client.db("ManagementSystem").collection("user").findOne({ "student_ID": {$eq : student_ID} });
+
     if (Attendance) {
-       // Save the attendance record
-       const attendance_record = {
-         username: username,
-         student_ID: student_ID,
-         attendance_date: attendance_date,
-         attendance_status: attendance_status,
-         lecturer: lecturer,
-         subject: subject,
-         faculty: faculty,
-       };
-  
-       client.db("ManagementSystem").collection("attendance").insertOne(attendance_record);
-       res.send("Attendance recorded");
-  
-       console.log(attendance_record);
+      // Save the attendance record
+      const attendance_record = {
+        username: username,
+        student_ID: student_ID,
+        attendance_date: attendance_date,
+        attendance_status: attendance_status,
+        lecturer: lecturer,
+        subject: subject,
+        faculty: faculty,
+      };
+
+      const existingAttendance = await client.db("ManagementSystem").collection("user").findOne({
+        "student_ID": {$eq : student_ID},
+        "attendance_date": {$eq : attendance_date},
+        "lecturer": {$eq : lecturer}, 
+        "subject": {$eq : subject},
+        "faculty": {$eq : faculty},
+      });
+
+      if (existingAttendance) {
+        return res.send("Attendance already recorded for this student in this subject and faculty");
+      } else {
+        const result = await client.db("ManagementSystem").collection("user").insertOne(attendance_record);
+        res.send("Attendance recorded");
+        console.log(attendance_record);
+      }
     } else {
-       res.send("Student not found ");
+      res.send("Student not found ");
+      console.log("Student not found");
     }
-  });
+  } catch (err) {
+    return res.status(500).send("Error occurred while checking attendance");
+  }
+});
+
+  
 
 
 //STUDENT SECTION FOR VIEWING DETAIL TIMELINE
