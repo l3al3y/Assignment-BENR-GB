@@ -124,6 +124,40 @@ app.post('/Lecturer/Studentlist', async (req, res) => {
   }
 });
 
+//lecturerUpdateSubject (update subject for student)
+app.post('/Lecturer/LecturerUpdateSubject/:student_ID', (req, res) => {
+  const student_ID = req.params.student_ID;
+  const subject = req.body.subject;
+
+  // Verify the bearer token
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).send('Unauthorized. Missing bearer token.');
+  }
+
+   jwt.verify(token, 'secret', (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden. Invalid token.');
+    }
+  });
+
+    // Update the subject for the specified student_ID
+    client.db("ManagementSystem").collection("attendance").updateOne(
+      { student_ID: student_ID },
+      { $set: { subject: subject } },
+      (err, result) => {
+        if (err) {
+          console.error("Error updating subject:", err);
+          res.status(500).send("Internal Server Error");
+        } else {
+          res.send(`Subject for student ${student_ID} updated to ${subject}`);
+        }
+      }
+    );
+  });
+  
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
