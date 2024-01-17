@@ -47,7 +47,7 @@ app.post('/Lecturer/login', async (req, res) => {
     return token;
   }
 
-  const lecturer = await client.db("ManagementSystem").collection("attendance").findOne({
+  const lecturer = await client.db("ManagementSystem").collection("user").findOne({
       "username": {$eq :req.body.username}
   });
   if (lecturer) {
