@@ -45,12 +45,13 @@ app.post('/admin/adduser', (req, res) => {
     if (result.length > 0) {
       res.status(400).send('Username already exists')
     } else {
-      const { username, password, student_ID, role,faculty } = req.body
+      const { username, password, student_ID, role,faculty,staff_ID } = req.body
       const hash = bcryptjs.hashSync(password, 10);
       client.db("ManagementSystem").collection("user").insertOne({
         "username": username,
         "password": hash,
         "student_ID": student_ID,
+        "staff_ID": staff_ID,
         "role": role,
         "faculty": faculty
       })
@@ -87,7 +88,7 @@ app.post('/admin/login', async (req, res) => {
       res.send("Password does not match");
     }
   } else {
-    res.send("Student not found");
+    res.send("User not found");
   }
 });
 
@@ -147,19 +148,37 @@ app.delete('/admin/deleteuser', async (req, res) => {
   const studentId = req.params.studentId;
 
   try {
-    const studentCollection = client.db("ManagementSystem").collection("user");
-    const result = await studentCollection.deleteOne({ "student_ID": studentId });
-
-    if (result.deletedCount > 0) {
-      res.send(`Student with ID ${studentId} deleted successfully`);
-    } else {
-      res.status(404).send("Student not found");
+    const student = await findStudentById(studentID);
+    if (!student) {
+      return res.status(404).send('Student not found');
     }
+    const result = await deleteStudent(studentID);
+    if (result.deletedCount > 0) {
+      res.status(200).send('Student data has been deleted');
+    }
+    else {
+      res.status(500).send('Failed to delete student data');
+    }
+  }
+  catch (error) {
+    console.error("Error deleting student data:", error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+);
+async function deleteStudent(studentId) {
+  try {
+    const database = client.db('ManagementSystem');
+    const collection = database.collection('user');
+
+    // Delete the student based on their student_id
+    const result = await collection.deleteOne({ student_id: studentId });
+    return result;
   } catch (error) {
     console.error("Error deleting student:", error);
-    res.status(500).send("Internal server error");
+    throw error;
   }
-});
+}
 
 
 app.patch('/admin/Update', (req, res) => {
