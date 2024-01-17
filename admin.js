@@ -47,7 +47,7 @@ app.post('/admin/adduser', (req, res) => {
     } else {
       const { username, password, student_ID, role,faculty } = req.body
       const hash = bcryptjs.hashSync(password, 10);
-      client.db("ManagementSystem").collection("attendance").insertOne({
+      client.db("ManagementSystem").collection("user").insertOne({
         "username": username,
         "password": hash,
         "student_ID": student_ID,

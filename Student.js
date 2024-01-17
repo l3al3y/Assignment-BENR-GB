@@ -31,13 +31,11 @@ async function run() {
 }
 run().catch(console.dir);
 
+const {username, password} = req.body;
+
 
 app.post('/students/login', async (req, res) => {
   console.log('login',req.body)  
-  
-  // Connect the client to the server
- 
-  const {username, password} = req.body;
 
   function generateToken(role) {
     const token = jwt.sign({
@@ -45,7 +43,7 @@ app.post('/students/login', async (req, res) => {
     }, 'secret', { expiresIn: '1m' });
     return token;
   }
- 
+   
   const Student = await client.db("ManagementSystem").collection("user").findOne({
        "username": {$eq :req.body.username}
   });
@@ -100,7 +98,7 @@ app.post('/students/record-attendance', async (req, res) => {
        attendance_status: attendance_status,
        lecturer: lecturer,
        subject: subject,
-       faculty: faculty
+       faculty: faculty,
      };
 
      client.db("ManagementSystem").collection("attendance").insertOne(attendance_record);
