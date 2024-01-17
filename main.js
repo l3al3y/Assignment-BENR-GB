@@ -202,18 +202,25 @@ app.post('/login', async (req, res) => {
        return res.status(400).send('Invalid attendance status. Accepted values are "present" or "absent"');
     }
   
-     // Verify the bearer token
-     const authHeader = req.headers['authorization'];
-     const token = authHeader && authHeader.split(' ')[1];
-   
+     function authenticateStudent(req, res, next) {
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+
      if (!token) {
        return res.status(401).send('Unauthorized. Missing bearer token.');
      }
    
-     jwt.verify(token, 'secret', (err, user) => {
-       if (err) {
-         return res.status(403).send('Forbidden. Invalid token.');
-       }
+     try {
+      const user = jwt.verify(token, 'secret');
+      if (user.role !== 'student') {
+        return res.status(403).send('Forbidden. Only students can record attendance.');
+      }
+      req.user = user;
+      next();
+    } catch (err) {
+      return res.status(403).send('Forbidden. Invalid token.');
+    }
+  }
    
     const Attendance = client.db("ManagementSystem").collection("user").findOne({
        "student_ID": {$eq : student_ID},
@@ -239,7 +246,7 @@ app.post('/login', async (req, res) => {
        res.send("Student not found ");
     }
   });
-});
+
 
 //STUDENT SECTION FOR VIEWING DETAIL TIMELINE
 
