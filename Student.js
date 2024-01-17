@@ -31,18 +31,17 @@ async function run() {
 }
 run().catch(console.dir);
 
-const {username, password} = req.body;
 
-
+function generateToken(role) {
+  const token = jwt.sign({
+    role:role
+  }, 'secret', { expiresIn: '1m' });
+  return token;
+}
 app.post('/students/login', async (req, res) => {
+  const {username, password} = req.body;
   console.log('login',req.body)  
 
-  function generateToken(role) {
-    const token = jwt.sign({
-      role:role
-    }, 'secret', { expiresIn: '1m' });
-    return token;
-  }
    
   const Student = await client.db("ManagementSystem").collection("user").findOne({
        "username": {$eq :req.body.username}
