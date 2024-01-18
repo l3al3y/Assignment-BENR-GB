@@ -256,7 +256,7 @@ app.post('/record-attendance', authenticateStudent, async (req, res) => {
 
 //STUDENT SECTION FOR VIEWING DETAIL TIMELINE
 
-app.post('detail-timeline', async (req, res) => {
+app.post('/detail-timeline', async (req, res) => {
   const { student_ID = req.body.student_ID } = req.body;
 
   try {
