@@ -78,7 +78,7 @@ app.post('/login', async (req, res) => {
 
 app.post('/adduser', (req, res) => {
   client.db("ManagementSystem").collection("user").find({
-    "student_ID": { $eq: req.body.student_ID }
+    "username": { $eq: req.body.username }
   }).toArray().then((result) => {
     if (result.length > 0) {
       res.status(400).send('ID already exists')
@@ -125,7 +125,7 @@ app.get('/list', async (req, res) => {
     if (List) {
       res.json(List);
     } else {
-      res.send("No record for this user");
+      res.send("No record for this subject");
     }
   } catch (error) {
     res.status(500).send("Internal server error");
