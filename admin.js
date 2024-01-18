@@ -143,28 +143,26 @@ jwt.verify(token, 'secret', (err, user) => {
   }
 });
 
+// ADMIN SECTION FOR DELETING USER BASED ON ID 
+
 app.delete('/admin/deleteuser', async (req, res) => {
-  const student_ID = req.params.student_ID;
+  const userId = req.params.id;
 
   try {
-    const student = await studentCollection(student_ID);
-    if (!student) {
-      return res.status(404).send('Student not found');
-    }
-    const result = await deleteStudent(student_ID);
+    const result = await client.db("ManagementSystem").collection("user").deleteOne({
+      "student_ID": userId
+    });
+
     if (result.deletedCount > 0) {
-      res.status(200).send('Student data has been deleted');
+      res.send(`User with ID ${userId} deleted successfully`);
+    } else {
+      res.send(`User with ID ${userId} not found`);
     }
-    else {
-      res.status(500).send('Failed to delete student data');
-    }
+  } catch (error) {
+    res.status(500).send("Internal server error");
   }
-  catch (error) {
-    console.error("Error deleting student data:", error);
-    res.status(500).send('Internal Server Error');
-  }
-}
-);
+});
+
 /*async function deleteStudent(student_Id) {
   try {
     const database = client.db('ManagementSystem');
