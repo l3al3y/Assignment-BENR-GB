@@ -56,8 +56,8 @@ app.post('/login', async (req, res) => {
       user.role = 'admin';
     } else if (user.username === 'student') {
       user.role = 'student';
-    } else if (user.username === 'teacher') {
-      user.role = 'teacher';
+    } else if (user.username === 'lecturer') {
+      user.role = 'lecturer';
     }
 
     const passwordMatch = await bcryptjs.compare(password, user.password);
