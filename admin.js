@@ -73,7 +73,7 @@ app.post('/admin/login', async (req, res) => {
     return token;
   }
 
-  const admin = await client.db("ManagementSystem").collection("attendance").findOne({
+  const admin = await client.db("ManagementSystem").collection("user").findOne({
     "username": { $eq: req.body.username }
 
     
@@ -145,14 +145,14 @@ jwt.verify(token, 'secret', (err, user) => {
 });
 
 app.delete('/admin/deleteuser', async (req, res) => {
-  const studentId = req.params.studentId;
+  const student_ID = req.params.student_ID;
 
   try {
-    const student = await findStudentById(studentID);
+    const student = await studentCollection(student_ID);
     if (!student) {
       return res.status(404).send('Student not found');
     }
-    const result = await deleteStudent(studentID);
+    const result = await deleteStudent(student_ID);
     if (result.deletedCount > 0) {
       res.status(200).send('Student data has been deleted');
     }
@@ -166,20 +166,20 @@ app.delete('/admin/deleteuser', async (req, res) => {
   }
 }
 );
-async function deleteStudent(studentId) {
+/*async function deleteStudent(student_Id) {
   try {
     const database = client.db('ManagementSystem');
     const collection = database.collection('user');
 
     // Delete the student based on their student_id
-    const result = await collection.deleteOne({ student_id: studentId });
+    const result = await collection.deleteOne({ student_ID: studentID });
     return result;
   } catch (error) {
     console.error("Error deleting student:", error);
     throw error;
   }
 }
-
+*/
 
 app.patch('/admin/Update', (req, res) => {
   client.db("ManagementSystem").collection("attendance").updateOne({
