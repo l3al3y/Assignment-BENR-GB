@@ -78,10 +78,10 @@ app.post('/login', async (req, res) => {
 
 app.post('/adduser', (req, res) => {
   client.db("ManagementSystem").collection("user").find({
-    "username": { $eq: req.body.username }
+    "student_ID": { $eq: req.body.student_ID }
   }).toArray().then((result) => {
     if (result.length > 0) {
-      res.status(400).send('Username already exists')
+      res.status(400).send('ID already exists')
     } else {
       const { username, password, student_ID, role, faculty, staff_ID } = req.body
       const hash = bcryptjs.hashSync(password, 10);
