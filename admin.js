@@ -72,7 +72,7 @@ app.post('/admin/login', async (req, res) => {
     return token;
   }
 
-  const admin = await client.db("ManagementSystem").collection("attendance").findOne({
+  const admin = await client.db("ManagementSystem").collection("user").findOne({
     "username": { $eq: req.body.username }
 
     
@@ -143,42 +143,40 @@ jwt.verify(token, 'secret', (err, user) => {
   }
 });
 
+// ADMIN SECTION FOR DELETING USER BASED ON ID 
+
 app.delete('/admin/deleteuser', async (req, res) => {
-  const studentId = req.params.studentId;
+  const userId = req.params.id;
 
   try {
-    const student = await findStudentById(studentID);
-    if (!student) {
-      return res.status(404).send('Student not found');
-    }
-    const result = await deleteStudent(studentID);
+    const result = await client.db("ManagementSystem").collection("user").deleteOne({
+      "student_ID": userId
+    });
+
     if (result.deletedCount > 0) {
-      res.status(200).send('Student data has been deleted');
+      res.send(`User with ID ${userId} deleted successfully`);
+    } else {
+      res.send(`User with ID ${userId} not found`);
     }
-    else {
-      res.status(500).send('Failed to delete student data');
-    }
+  } catch (error) {
+    res.status(500).send("Internal server error");
   }
-  catch (error) {
-    console.error("Error deleting student data:", error);
-    res.status(500).send('Internal Server Error');
-  }
-}
-);
-async function deleteStudent(studentId) {
+});
+
+/*async function deleteStudent(student_Id) {
   try {
     const database = client.db('ManagementSystem');
     const collection = database.collection('user');
 
     // Delete the student based on their student_id
-    const result = await collection.deleteOne({ student_id: studentId });
+    const result = await collection.deleteOne({ student_ID: studentID });
     return result;
   } catch (error) {
     console.error("Error deleting student:", error);
     throw error;
   }
 }
-
+*/
 
 app.patch('/admin/Update', (req, res) => {
   client.db("ManagementSystem").collection("attendance").updateOne({
