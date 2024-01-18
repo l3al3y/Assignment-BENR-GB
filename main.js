@@ -178,7 +178,6 @@ app.post('/Studentlist', async (req, res) => {
       const studentList = lecturer.map(record => ({
         username: record.username,
         student_ID: record.student_ID,
-        subject: record.subject,
         faculty: record.faculty
       }));
 
