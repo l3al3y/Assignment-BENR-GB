@@ -274,6 +274,26 @@ app.post('detail-timeline', async (req, res) => {
   }
 });
 
+//DELETE USER BASED ON ID
+app.delete('/admin/deleteuser', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const result = await client.db("ManagementSystem").collection("user").deleteOne({
+      "student_ID": userId
+    });
+
+    if (result.deletedCount > 0) {
+      res.send(`User with ID ${userId} deleted successfully`);
+    } else {
+      res.send(`User with ID ${userId} not found`);
+    }
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
