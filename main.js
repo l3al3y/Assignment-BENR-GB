@@ -293,39 +293,18 @@ app.post('/deleteuser', async (req, res) => {
   }
 });
 
-app.post('/addfaculty', (req, res) => {
-  client.db("ManagementSystem").collection("faculty").find({
-    "faculty": { $eq: req.body.faculty }
-  }).toArray().then((result) => {
-    if (result.length > 0) {
-      res.status(400).send('Faculty already exists')
-    } else {
-      const { username,student_ID, role, faculty, staff_ID } = req.body
-      client.db("ManagementSystem").collection("faculty").insertOne({
-        "username": username,
-        "password": hash,
-        "student_ID": student_ID,
-        "staff_ID": staff_ID,
-        "role": role,
-        "faculty": faculty
-      })
-      res.send('Faculty added successfully')
-    }
-  })
-});
-
-app.post('/deletesubject', async (req, res) => {
-  const userId = req.body.student_ID;
+app.post('/deleteprogram', async (req, res) => {
+  const programId = req.body.program;
 
   try {
     const result = await client.db("ManagementSystem").collection("faculty").deleteOne({
-      "subject": subject
+      "program": programId
     });
 
     if (result.deletedCount > 0) {
-      res.send(`User with ID ${userId} deleted successfully`);
+      res.send(`User with ID ${programId} deleted successfully`);
     } else {
-      res.send(`User with ID ${userId} not found`);
+      res.send(`User with ID ${programId} not found`);
     }
   } catch (error) {
     res.status(500).send("Internal server error");
@@ -333,19 +312,17 @@ app.post('/deletesubject', async (req, res) => {
 });
 
 
-app.post('/addsubject', (req, res) => {
+app.post('/addprogram', (req, res) => {
   client.db("ManagementSystem").collection("faculty").find({
-    "subject": { $eq: req.body.subject }
+    "program": { $eq: req.body.program}
   }).toArray().then((result) => {
     if (result.length > 0) {
       res.status(400).send('ID already exists')
     } else {
-      const { username, password, student_ID, role, faculty, staff_ID } = req.body
-      const hash = bcryptjs.hashSync(password, 10);
+      const { program,lecturer } = req.body
       client.db("ManagementSystem").collection("faculty").insertOne({
-        "subject": subject,
-        "code-subject": code-subject,
-        lecturer: lecturer,
+        "program": program,
+        "lecturer": lecturer,
       })
       res.send('Register successfully')
     }
