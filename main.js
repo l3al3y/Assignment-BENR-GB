@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, Code } = require('mongodb');
 const e = require('express');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
@@ -330,6 +330,26 @@ app.post('/deletesubject', async (req, res) => {
   } catch (error) {
     res.status(500).send("Internal server error");
   }
+});
+
+
+app.post('/addsubject', (req, res) => {
+  client.db("ManagementSystem").collection("faculty").find({
+    "subject": { $eq: req.body.subject }
+  }).toArray().then((result) => {
+    if (result.length > 0) {
+      res.status(400).send('ID already exists')
+    } else {
+      const { username, password, student_ID, role, faculty, staff_ID } = req.body
+      const hash = bcryptjs.hashSync(password, 10);
+      client.db("ManagementSystem").collection("faculty").insertOne({
+        "subject": subject,
+        "code-subject": code-subject,
+        lecturer: lecturer,
+      })
+      res.send('Register successfully')
+    }
+  })
 });
 
 
