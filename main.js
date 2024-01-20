@@ -276,7 +276,7 @@ app.post('/detail-timeline', async (req, res) => {
 
 //DELETE USER BASED ON ID
 app.delete('/admin/deleteuser', async (req, res) => {
-  const userId = req.params.id;
+  const { userId } = req.body;
 
   try {
     const result = await client.db("ManagementSystem").collection("user").deleteOne({
