@@ -314,6 +314,26 @@ app.post('/addfaculty', (req, res) => {
   })
 });
 
+app.post('/deletesubject', async (req, res) => {
+  const userId = req.body.student_ID;
+
+  try {
+    const result = await client.db("ManagementSystem").collection("faculty").deleteOne({
+      "student_ID": userId
+    });
+
+    if (result.deletedCount > 0) {
+      res.send(`User with ID ${userId} deleted successfully`);
+    } else {
+      res.send(`User with ID ${userId} not found`);
+    }
+  } catch (error) {
+    res.status(500).send("Internal server error");
+  }
+});
+
+
+
 
 
 app.listen(port, () => {
