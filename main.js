@@ -293,6 +293,28 @@ app.post('/deleteuser', async (req, res) => {
   }
 });
 
+app.post('/addfaculty', (req, res) => {
+  client.db("ManagementSystem").collection("faculty").find({
+    "faculty": { $eq: req.body.faculty }
+  }).toArray().then((result) => {
+    if (result.length > 0) {
+      res.status(400).send('Faculty already exists')
+    } else {
+      const { username,student_ID, role, faculty, staff_ID } = req.body
+      client.db("ManagementSystem").collection("faculty").insertOne({
+        "username": username,
+        "password": hash,
+        "student_ID": student_ID,
+        "staff_ID": staff_ID,
+        "role": role,
+        "faculty": faculty
+      })
+      res.send('Faculty added successfully')
+    }
+  })
+});
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
