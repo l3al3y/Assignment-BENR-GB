@@ -335,10 +335,11 @@ app.post('/addsubject', (req, res) => {
     if (result.length > 0) {
       res.status(400).send('Subject already exists')
     } else {
-      const { subject,lecturer } = req.body
+      const { subject,lecturer,subjectID } = req.body
       client.db("ManagementSystem").collection("faculty").insertOne({
         "subject": subject,
         "lecturer": lecturer,
+        "subjectID":subjectID
       })
       res.send('Register successfully')
     }
@@ -346,7 +347,7 @@ app.post('/addsubject', (req, res) => {
 });
 
 app.post('/deletesubject', async (req, res) => {
-  const subjectId = req.body.program;
+  const subjectId = req.body.subject;
 
   try {
     const result = await client.db("ManagementSystem").collection("faculty").deleteOne({
@@ -354,9 +355,9 @@ app.post('/deletesubject', async (req, res) => {
     });
 
     if (result.deletedCount > 0) {
-      res.send(`Subject with ID ${subjectId} deleted successfully`);
+      res.send(`Subject ${subjectId} deleted successfully`);
     } else {
-      res.send(`Subject with ID ${subjectId} not found`);
+      res.send(`Subject ${subjectId} not found`);
     }
   } catch (error) {
     res.status(500).send("Internal server error");
