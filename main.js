@@ -319,7 +319,7 @@ app.post('/deletesubject', async (req, res) => {
 
   try {
     const result = await client.db("ManagementSystem").collection("faculty").deleteOne({
-      "student_ID": userId
+      "subject": subject
     });
 
     if (result.deletedCount > 0) {
