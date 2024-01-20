@@ -298,7 +298,7 @@ app.post('/addprogram', (req, res) => {
     "program": { $eq: req.body.program}
   }).toArray().then((result) => {
     if (result.length > 0) {
-      res.status(400).send('ID already exists')
+      res.status(400).send('Program already exists')
     } else {
       const { program,lecturer } = req.body
       client.db("ManagementSystem").collection("faculty").insertOne({
@@ -319,9 +319,9 @@ app.post('/deleteprogram', async (req, res) => {
     });
 
     if (result.deletedCount > 0) {
-      res.send(`User with ID ${programId} deleted successfully`);
+      res.send(`Program with ID ${programId} deleted successfully`);
     } else {
-      res.send(`User with ID ${programId} not found`);
+      res.send(`Program with ID ${programId} not found`);
     }
   } catch (error) {
     res.status(500).send("Internal server error");
@@ -333,7 +333,7 @@ app.post('/addsubject', (req, res) => {
     "subject": { $eq: req.body.subject}
   }).toArray().then((result) => {
     if (result.length > 0) {
-      res.status(400).send('subject already exists')
+      res.status(400).send('Subject already exists')
     } else {
       const { subject,lecturer } = req.body
       client.db("ManagementSystem").collection("faculty").insertOne({
