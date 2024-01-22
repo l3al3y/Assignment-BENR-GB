@@ -3,7 +3,6 @@ const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, Code } = require('mongodb');
