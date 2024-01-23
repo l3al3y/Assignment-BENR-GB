@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken')
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, Code } = require('mongodb');
-const e = require('express');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -363,9 +362,6 @@ app.post('/deletesubject', async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
- });
 
 
 app.listen(port, () => {
