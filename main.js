@@ -5,6 +5,9 @@ const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 app.use(express.json());
 
+app.use(express.urlencoded({ extended: true }))
+app.use(express.static('public'))
+
 const { MongoClient, ServerApiVersion, Code } = require('mongodb');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
