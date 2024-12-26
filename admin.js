@@ -1,12 +1,16 @@
-const express = require('express')
-const app = express()
-const port = process.env.PORT || 3000;
-const bcryptjs = require('bcrypt')
-const jwt = require('jsonwebtoken')
-
-
+require('dotenv').config(); // Load environment variables
+const express = require('express');
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// MongoDB configuration
+const uri = process.env.MONGODB_URI;
+const jwtSecret = process.env.JWT_SECRET;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -16,142 +20,117 @@ const client = new MongoClient(uri, {
   }
 });
 
-async function run() {
+// Connect to MongoDB
+async function connectToDatabase() {
   try {
-    // Connect the client to the server
     await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    //await client.close();
+    console.log("Connected to MongoDB!");
+  } catch (err) {
+    console.error("Failed to connect to MongoDB:", err);
+    process.exit(1); // Exit process on failure
   }
 }
-run().catch(console.dir);
+connectToDatabase();
+
+// Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.post('/admin', (req, res) => {
-  const admin = req.body;
-  students.push(student);
-  res.send(`Admin ${admin.name} added`);
-});
+// JWT Authentication Middleware
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-app.post('/admin/adduser', (req, res) => {
-  client.db("ManagementSystem").collection("user").find({
-    "username": { $eq: req.body.username }
-  }).toArray().then((result) => {
-    if (result.length > 0) {
-      res.status(400).send('Username already exists')
-    } else {
-      const { username, password, student_ID, role,faculty,staff_ID } = req.body
-      const hash = bcryptjs.hashSync(password, 10);
-      client.db("ManagementSystem").collection("user").insertOne({
-        "username": username,
-        "password": hash,
-        "student_ID": student_ID,
-        "staff_ID": staff_ID,
-        "role": role,
-        "faculty": faculty
-      })
-      res.send('Register successfully')
-    }
-  })
-})
-
-app.post('/admin/login', async (req, res) => {
-  // Connect the client to the server
-
-  const username = req.body.username;
-  const password = req.body.password;
-  
-  function generateToken(role) {
-    const token = jwt.sign({
-      role:role
-    }, 'secret', { expiresIn: '1m' });
-    return token;
+  if (!token) {
+    return res.status(401).send('Unauthorized. Missing token.');
   }
 
-  const admin = await client.db("ManagementSystem").collection("user").findOne({
-    "username": { $eq: req.body.username }
-
-    
+  jwt.verify(token, jwtSecret, (err, user) => {
+    if (err) {
+      return res.status(403).send('Forbidden. Invalid token.');
+    }
+    req.user = user; // Attach user details to the request
+    next();
   });
-  if (admin) {
-    const passwordMatch = await bcryptjs.compare(password, admin.password);
-    if (passwordMatch) {
-      const token = generateToken(admin.role);
-           res.send({ token: token, message: "Login successful" });
-           console.log(token);
-    } else {
-      res.send("Password does not match");
-    }
-  } else {
-    res.send("User not found");
-  }
-});
-
-app.get('/admin/viewdetail', async (req, res) => {
-  const { role } = req.body;
-  
-
-  try {
-    const Attendance = await client.db("ManagementSystem").collection("user").find({
-      "role": role,
-      
-    }).toArray();
-
-    if (Attendance) {
-      res.json(Attendance);
-    } else {
-      res.send("No record for this user");
-    }
-  } catch (error) {
-    res.status(500).send("Internal server error");
-  }
-});
-
-app.get('/admin/list', async (req, res) => {
-  const { subject } = req.body;
-  
-// Verify the bearer token
-const authHeader = req.headers['authorization'];
-const token = authHeader && authHeader.split(' ')[1];
-
-if (!token) {
-  return res.status(401).send('Unauthorized. Missing bearer token.');
 }
 
-jwt.verify(token, 'secret', (err, user) => {
-  if (err) {
-    return res.status(403).send('Forbidden. Invalid token.');
-  }
-});
+// Generate JWT Token
+function generateToken(role) {
+  return jwt.sign({ role }, jwtSecret, { expiresIn: '10m' });
+}
+
+// Admin Add User
+app.post('/admin/adduser', authenticateToken, async (req, res) => {
   try {
-    const List = await client.db("ManagementSystem").collection("attendance").find({
-      "subject": subject,
-      
-    }).toArray();
+    const { username, password, student_ID, role, faculty, staff_ID } = req.body;
 
-    if (List) {
-      res.json(List);
-    } else {
-      res.send("No record for this user");
+    // Check if username already exists
+    const existingUser = await client.db("ManagementSystem").collection("user").findOne({ username });
+    if (existingUser) {
+      return res.status(400).send("Username already exists");
     }
+
+    // Hash password and generate unique secret key
+    const hashedPassword = bcryptjs.hashSync(password, 10);
+    const uniqueSecretKey = crypto.randomBytes(16).toString('hex');
+
+    // Insert user into database
+    await client.db("ManagementSystem").collection("user").insertOne({
+      username,
+      password: hashedPassword,
+      student_ID,
+      staff_ID,
+      role,
+      faculty,
+      uniqueSecretKey
+    });
+
+    res.status(201).send({
+      message: "User added successfully",
+      uniqueSecretKey
+    });
   } catch (error) {
-    res.status(500).send("Internal server error");
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-// ADMIN SECTION FOR DELETING USER BASED ON ID 
+// Admin Login
+app.post('/admin/login', async (req, res) => {
+  const { username, password, uniqueSecretKey } = req.body;
 
-app.delete('/admin/deleteuser', async (req, res) => {
+  try {
+    const admin = await client.db("ManagementSystem").collection("user").findOne({ username });
+    if (!admin) {
+      return res.status(404).send("User not found");
+    }
+
+    // Validate password
+    const passwordMatch = await bcryptjs.compare(password, admin.password);
+    if (!passwordMatch) {
+      return res.status(401).send("Password does not match");
+    }
+
+    // Validate unique secret key
+    if (admin.uniqueSecretKey !== uniqueSecretKey) {
+      return res.status(401).send("Invalid unique secret key");
+    }
+
+    // Generate and send JWT
+    const token = generateToken(admin.role);
+    res.status(200).send({ token, message: "Login successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Admin Delete User
+app.delete('/admin/deleteuser/:id', authenticateToken, async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const result = await client.db("ManagementSystem").collection("user").deleteOne({
-      "student_ID": userId
-    });
+    const result = await client.db("ManagementSystem").collection("user").deleteOne({ student_ID: userId });
 
     if (result.deletedCount > 0) {
       res.send(`User with ID ${userId} deleted successfully`);
@@ -159,44 +138,46 @@ app.delete('/admin/deleteuser', async (req, res) => {
       res.send(`User with ID ${userId} not found`);
     }
   } catch (error) {
-    res.status(500).send("Internal server error");
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
+// Admin View User Details
+app.get('/admin/viewdetail', authenticateToken, async (req, res) => {
+  const { role } = req.query;
 
-
-/*async function deleteStudent(student_Id) {
   try {
-    const database = client.db('ManagementSystem');
-    const collection = database.collection('user');
-
-    // Delete the student based on their student_id
-    const result = await collection.deleteOne({ student_ID: studentID });
-    return result;
+    const users = await client.db("ManagementSystem").collection("user").find({ role }).toArray();
+    res.status(200).json(users);
   } catch (error) {
-    console.error("Error deleting student:", error);
-    throw error;
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
-}
-*/
+});
 
-app.patch('/admin/Update', (req, res) => {
-  client.db("ManagementSystem").collection("attendance").updateOne({
-    "username": { $eq: req.body.username }}, 
-    {
-    $set: {
-      "email": req.body.email,
-      "student_ID": req.body.student_ID,
-      "role": req.body.role,
+// Admin Update User
+app.patch('/admin/updateuser', authenticateToken, async (req, res) => {
+  const { username, email, student_ID, role } = req.body;
 
-     },
+  try {
+    const result = await client.db("ManagementSystem").collection("user").updateOne(
+      { username },
+      { $set: { email, student_ID, role } }
+    );
 
-  }).then(result => {
-    res.send('Update successfully')
-  })
-})
+    if (result.modifiedCount > 0) {
+      res.send("User updated successfully");
+    } else {
+      res.send("No changes made or user not found");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
-
+// Start Server
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
