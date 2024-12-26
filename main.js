@@ -45,35 +45,56 @@ function generateToken(role) {
 //LOGIN SECTION FOR 3 TYPES OF USERS(ADMIN,STUDENT,LECTURER)
 
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log('login', req.body)
+  const { username, password, uniqueSecretKey } = req.body;
+  console.log('login', req.body);
 
-  const user = await client.db("ManagementSystem").collection("user").findOne({
-    "username": req.body.username
-  });
+  try {
+    // Find user in the database
+    const user = await client.db("ManagementSystem").collection("user").findOne({ username: username });
 
-  if (user) {
-    if (user.username === 'admin') {
-      user.role = 'admin';
-    } else if (user.username === 'student') {
-      user.role = 'student';
-    } else if (user.username === 'lecturer') {
-      user.role = 'lecturer';
+    if (!user) {
+      return res.status(404).send("User not found");
     }
 
+    // Validate password
     const passwordMatch = await bcryptjs.compare(password, user.password);
-
-    if (passwordMatch) {
-      const token = generateToken(user.role);
-      res.send({ token: token, message: "Login successful" });
-      console.log(token);
-    } else {
-      res.send("Password does not match");
+    if (!passwordMatch) {
+      return res.status(401).send("Password does not match");
     }
-  } else {
-    res.send("User not found");
+
+    // Validate unique secret key
+    if (user.uniqueSecretKey !== uniqueSecretKey) {
+      return res.status(401).send("Invalid unique secret key");
+    }
+
+    // Assign role based on username
+    let role;
+    if (username === 'admin') {
+      role = 'admin';
+    } else if (username === 'student') {
+      role = 'student';
+    } else if (username === 'lecturer') {
+      role = 'lecturer';
+    } else {
+      return res.status(403).send("Role not authorized");
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { username: user.username, role: role, uniqueSecretKey: user.uniqueSecretKey },
+      'secret', // Use a strong secret here!
+      { expiresIn: '10m' }
+    );
+
+    res.status(200).send({ token: token, message: "Login successful" });
+    console.log("Token:", token);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
+
 
 //ADMIN SECTION FOR ADDING USER AND VIEWING ATTENDANCE LIST
 
