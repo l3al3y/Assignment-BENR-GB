@@ -3,6 +3,9 @@ const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto');
+const uniqueKey = crypto.randomBytes(16).toString('hex');
+
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }))
@@ -36,10 +39,12 @@ run().catch(console.dir);
 
 
 function generateToken(role) {
-  const token = jwt.sign({
-    role: role
-  }, 'secret', { expiresIn: '10m' });
-  return token;
+  const token = jwt.sign(
+    { username: user.username, role: role, uniqueSecretKey: user.uniqueSecretKey },
+    process.env.JWT_SECRET,
+    { expiresIn: '10m' }
+  );
+  
 }
 
 //LOGIN SECTION FOR 3 TYPES OF USERS(ADMIN,STUDENT,LECTURER)
