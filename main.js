@@ -38,7 +38,7 @@ run().catch(console.dir);
 function generateToken(role) {
   const token = jwt.sign({
     role: role
-  }, 'secret', { expiresIn: '10m' });
+  }, 'secret', { expiresIn: '3m' });
   return token;
 }
 
