@@ -8,6 +8,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
+const secret = ']22Ck)32Sem8';
+
 const { MongoClient, ServerApiVersion, Code } = require('mongodb');
 const uri = "mongodb+srv://groupb:abc12345@groupb.6djtmth.mongodb.net/?retryWrites=true&w=majority";
 
@@ -34,11 +36,10 @@ async function run() {
 }
 run().catch(console.dir);
 
-
 function generateToken(role) {
   const token = jwt.sign({
     role: role
-  }, 'secret', { expiresIn: '3m' });
+  }, secret, { expiresIn: '3m' });
   return token;
 }
 
@@ -113,7 +114,7 @@ app.get('/list', async (req, res) => {
     return res.status(401).send('Unauthorized. Missing bearer token.');
   }
 
-  jwt.verify(token, 'secret', (err, user) => {
+  jwt.verify(token, secret, (err, user) => {
     if (err) {
       return res.status(403).send('Forbidden. Invalid token.');
     }
@@ -148,7 +149,7 @@ app.post('/ViewAttendanceStudent', async (req, res) => {
     return res.status(401).send('Unauthorized. Missing bearer token.');
   }
 
-  jwt.verify(token, 'secret', (err, user) => {
+  jwt.verify(token, secret, (err, user) => {
     if (err) {
       return res.status(403).send('Forbidden. Invalid token.');
     }
@@ -205,7 +206,7 @@ function authenticateStudent(req, res, next) {
   }
 
   try {
-    const user = jwt.verify(token, 'secret');
+    const user = jwt.verify(token, secret);
     if (user.role !== 'student') {
       return res.status(403).send('Forbidden. Only students can record attendance.');
     }
@@ -365,8 +366,6 @@ app.post('/deletesubject', async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
-
-
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
