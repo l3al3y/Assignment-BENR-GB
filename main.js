@@ -3,8 +3,10 @@ const app = express()
 const port = process.env.PORT || 3000;
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-app.use(express.json());
+const rateLimit = require('express-rate-limit');
+const validator = require('validator');
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static('public'))
 
@@ -39,13 +41,19 @@ run().catch(console.dir);
 function generateToken(role) {
   const token = jwt.sign({
     role: role
-  }, secret, { expiresIn: '3m' });
+  }, secret, { expiresIn: '10m' });
   return token;
 }
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login requests per `window` (here, per 15 minutes)
+  message: 'Too many login attempts from this IP, please try again after 15 minutes'
+});
+
 //LOGIN SECTION FOR 3 TYPES OF USERS(ADMIN,STUDENT,LECTURER)
 
-app.post('/login', async (req, res) => {
+app.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   console.log('login', req.body)
   const user = await client.db("ManagementSystem").collection("user").findOne({
@@ -87,6 +95,18 @@ app.post('/adduser', (req, res) => {
       res.status(400).send('ID already exists')
     } else {
       const { username, password, student_ID, role, faculty, staff_ID } = req.body
+
+      // Password strength validation
+      if (!validator.isStrongPassword(password, {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+      })) {
+        return res.status(400).send('Password is not strong enough. It should be at least 8 characters long and include at least one lowercase letter, one uppercase letter, one number, and one symbol.');
+      }
+      
       const hash = bcryptjs.hashSync(password, 10);
       client.db("ManagementSystem").collection("user").insertOne({
         "username": username,
